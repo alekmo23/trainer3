@@ -223,24 +223,8 @@ window.nocturnalBirdsData = [
         rarity: "rare",
         sound: "sounds/ninox_japonica.mp3"
     },
-    {
+       {
         id: 15,
-        name: "Полярная сова",
-        scientific: "Bubo scandiacus",
-        family: "Strigidae",
-        activity: "nocturnal",
-        image: "images/bubo_scandiacus.jpg",
-        description: "Крупная белая сова полярных районов, имеет маскировочное белоснежное оперение.",
-        size: "55–65 см",
-        wingspan: "140–160 см",
-        weight: "1.5–3 кг",
-        diet: ["лемминги", "крупные насекомые", "мелкие птицы"],
-        habitat: "арктика, тундра",
-        rarity: "uncommon",
-        sound: "sounds/bubo_scandiacus.mp3"
-    },
-    {
-        id: 16,
         name: "Обыкновенная сипуха",
         scientific: "Tyto alba",
         family: "Tytonidae",
