@@ -1,0 +1,346 @@
+/* Основные стили */
+:root {
+  --primary: #7c3aed;
+  --primary-dark: #6d28d9;
+  --primary-light: #c4b5fd;
+  --secondary: #059669;
+  --accent: #d97706;
+  --error: #dc2626;
+  --success: #10b981;
+  --warning: #f59e0b;
+  
+  --text: #e2e8f0;
+  --text-light: #94a3b8;
+  --text-lighter: #64748b;
+  
+  --bg: #0f172a;
+  --night-bg: #1a1a2e;
+  --night-card: #16213e;
+  --card-border: #2d3748;
+  
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+  
+  --transition: all 0.2s ease;
+  --transition-slow: all 0.3s ease;
+}
+
+/* Базовые стили */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  background-color: var(--night-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  max-width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0 var(--space-md);
+}
+
+/* Шапка */
+.app-header {
+  padding: var(--space-lg) 0;
+  margin-bottom: var(--space-md);
+  text-align: center;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.app-header h1 {
+  font-size: 1.75rem;
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--primary-light);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Кнопки */
+button,
+.primary-btn,
+.secondary-btn,
+.danger-btn,
+.admin-btn,
+.option-btn,
+.next-btn,
+.hint-btn,
+.filter-btn,
+.page-btn {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.9rem;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  user-select: none;
+}
+
+button:disabled,
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.secondary-btn {
+  background: var(--night-card);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: #1e293b;
+  border-color: var(--primary-light);
+}
+
+.danger-btn {
+  background: var(--error);
+  color: white;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.admin-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.option-btn {
+  text-align: center;
+  transition: var(--transition-slow);
+}
+
+.option-btn.correct {
+  background: var(--success) !important;
+  color: white;
+  transform: scale(0.98);
+}
+
+.option-btn.incorrect {
+  background: var(--error) !important;
+  color: white;
+  transform: scale(0.98);
+}
+
+/* Формы */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+
+.form-control {
+  width: 100%;
+  padding: var(--space-sm);
+  background: #1e293b;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+}
+
+textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-sm) center;
+  background-size: 16px;
+  padding-right: var(--space-xl);
+}
+
+/* Карточки */
+.card {
+  background: var(--night-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--card-border);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Изображения */
+.img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.img-contain {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.img-lazy {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.img-lazy.loaded {
+  opacity: 1;
+}
+
+/* Утилиты */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.gap-xs { gap: var(--space-xs); }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+
+.text-center { text-align: center; }
+.text-muted { color: var(--text-light); }
+.text-small { font-size: 0.85rem; }
+
+.mt-auto { margin-top: auto; }
+.mb-sm { margin-bottom: var(--space-sm); }
+
+.rounded-full { border-radius: var(--radius-full); }
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .birds-list {
+    height: 200px;
+  }
+  
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .app-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    padding: 0 var(--space-lg);
+  }
+}
+
+/* Кастомный скроллбар */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--night-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}

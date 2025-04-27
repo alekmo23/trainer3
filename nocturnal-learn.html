@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Обучение - Ночные хищные птицы</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .learn-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.5rem;
+    }
+    
+    .learning-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .filter-controls {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .birds-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .bird-card {
+      background: var(--night-card);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      border: 1px solid #2d3748;
+      transition: transform 0.2s;
+    }
+    
+    .bird-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .bird-image-container {
+      height: 180px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .bird-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.3s;
+    }
+    
+    .bird-card:hover .bird-image {
+      transform: scale(1.05);
+    }
+    
+    .bird-info {
+      padding: 0.5rem;
+    }
+    
+    .bird-name {
+      font-size: 1rem;
+      margin: 0.2rem 0;
+      color: #a78bfa;
+    }
+    
+    .bird-scientific {
+      font-style: italic;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.3rem;
+    }
+    
+    .bird-description {
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .bird-stats {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+    
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1>Режим обучения</h1>
+        <p class="subtitle">Ночные хищные птицы России</p>
+      </div>
+    </header>
+
+    <main class="learn-container">
+      <div class="learning-header">
+        <div class="search-box">
+          <input type="text" class="search-input" placeholder="Поиск птиц..." id="search-input">
+        </div>
+        
+        <div class="filter-controls">
+          <button class="filter-btn active" data-filter="all">Все</button>
+          <button class="filter-btn" data-filter="common">Обычные</button>
+          <button class="filter-btn" data-filter="rare">Редкие</button>
+        </div>
+      </div>
+      
+      <div class="birds-grid" id="birds-container">
+        <!-- Сюда загружаются карточки птиц -->
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <button class="admin-btn" onclick="window.location.href='index.html'">На главную</button>
+    </footer>
+  </div>
+
+  <script src="scripts/birds-data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const birdsContainer = document.getElementById('birds-container');
+      const searchInput = document.getElementById('search-input');
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      
+      let birdsData = window.nocturnalBirdsData;
+      
+      function loadBirds(filter = 'all', search = '') {
+        birdsContainer.innerHTML = '';
+        
+        const filteredBirds = birdsData.filter(bird => {
+          const matchesFilter = filter === 'all' || 
+                              (filter === 'common' && bird.rarity === 'common') || 
+                              (filter === 'rare' && bird.rarity === 'rare');
+          
+          const matchesSearch = bird.name.toLowerCase().includes(search.toLowerCase()) || 
+                              bird.scientific.toLowerCase().includes(search.toLowerCase());
+          
+          return matchesFilter && matchesSearch;
+        });
+        
+        if(filteredBirds.length === 0) {
+          birdsContainer.innerHTML = '<p class="no-results">Птицы не найдены. Попробуйте изменить параметры поиска.</p>';
+          return;
+        }
+        
+        filteredBirds.forEach(bird => {
+          const card = document.createElement('div');
+          card.className = 'bird-card';
+          card.innerHTML = `
+            <div class="bird-image-container">
+              <img src="${bird.image}" alt="${bird.name}" class="bird-image" loading="lazy">
+            </div>
+            <div class="bird-info">
+              <h3 class="bird-name">${bird.name}</h3>
+              <div class="bird-scientific">${bird.scientific}</div>
+              <p class="bird-description">${bird.description}</p>
+              <div class="bird-stats">
+                <span>📏 ${bird.size}</span>
+                <span>⚖️ ${bird.weight}</span>
+              </div>
+            </div>
+          `;
+          birdsContainer.appendChild(card);
+        });
+      }
+      
+      // Инициализация
+      loadBirds();
+      
+      // Поиск
+      searchInput.addEventListener('input', function() {
+        const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+        loadBirds(activeFilter, this.value);
+      });
+      
+      // Фильтрация
+      filterButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          filterButtons.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          loadBirds(this.dataset.filter, searchInput.value);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

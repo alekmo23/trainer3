@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Экзамен - Ночные хищные птицы</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0.5rem;
+    }
+    
+    .exam-info {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: var(--night-card);
+      border-radius: 0.5rem;
+    }
+    
+    .timer-container {
+      padding: 0.3rem;
+      margin-bottom: 0.5rem;
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      border-radius: 0.5rem;
+    }
+    
+    .bird-display {
+      height: 300px;
+      margin-bottom: 0.5rem;
+      background: var(--night-card);
+      border-radius: 0.5rem;
+    }
+    
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .exam-results {
+      padding: 1rem;
+      background: var(--night-card);
+      border-radius: 0.5rem;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1>Экзаменационный режим</h1>
+        <p class="subtitle">Проверка знаний ночных хищных птиц</p>
+      </div>
+    </header>
+
+    <main class="test-container">
+      <div class="exam-info">
+        <div class="info-item">
+          <div class="info-value" id="question-count">0/10</div>
+          <div class="info-label">Вопросы</div>
+        </div>
+        <div class="info-item">
+          <div class="info-value" id="correct-count">0</div>
+          <div class="info-label">Правильно</div>
+        </div>
+        <div class="info-item">
+          <div class="info-value" id="incorrect-count">0</div>
+          <div class="info-label">Ошибки</div>
+        </div>
+      </div>
+      
+      <div class="timer-container">
+        Осталось времени: <span id="timer">02:00</span>
+      </div>
+      
+      <div id="test-content">
+        <div class="bird-display">
+  <div class="image-ratio-3-2">
+    <img id="bird-image" class="bird-image" src="" alt="Фото птицы">
+  </div>
+</div>
+        
+        <div class="options-grid" id="options-container">
+          <!-- Варианты ответов загружаются через JS -->
+        </div>
+        
+        <button id="next-btn" class="next-btn" disabled>Следующий вопрос</button>
+      </div>
+      
+      <div id="exam-results" class="exam-results">
+        <h2>Экзамен завершен!</h2>
+        <div class="results-score" id="final-score">0/10</div>
+        <div class="action-buttons">
+          <button id="restart-btn" class="restart-btn">Начать заново</button>
+          <button id="home-btn" class="home-btn">На главную</button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <button class="admin-btn" onclick="window.location.href='index.html'">На главную</button>
+    </footer>
+  </div>
+
+  <script src="scripts/birds-data.js"></script>
+  <script src="scripts/stats.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const birdsData = window.nocturnalBirdsData;
+      const config = {
+        totalQuestions: 10,
+        timeLimit: 120
+      };
+      
+      const state = {
+        currentQuestion: 0,
+        correctAnswers: 0,
+        incorrectAnswers: 0,
+        timeLeft: config.timeLimit,
+        timer: null
+      };
+      
+      const elements = {
+        questionCount: document.getElementById('question-count'),
+        correctCount: document.getElementById('correct-count'),
+        incorrectCount: document.getElementById('incorrect-count'),
+        timer: document.getElementById('timer'),
+        birdImage: document.getElementById('bird-image'),
+        optionsContainer: document.getElementById('options-container'),
+        nextBtn: document.getElementById('next-btn'),
+        testContent: document.getElementById('test-content'),
+        examResults: document.getElementById('exam-results'),
+        finalScore: document.getElementById('final-score'),
+        restartBtn: document.getElementById('restart-btn'),
+        homeBtn: document.getElementById('home-btn')
+      };
+      
+      // Загрузка вопроса
+      function loadQuestion() {
+        state.currentQuestion++;
+        
+        if(state.currentQuestion > config.totalQuestions) {
+          finishExam();
+          return;
+        }
+        
+        elements.questionCount.textContent = `${state.currentQuestion}/${config.totalQuestions}`;
+        
+        const currentBird = birdsData[Math.floor(Math.random() * birdsData.length)];
+        elements.birdImage.src = currentBird.image;
+        elements.birdImage.alt = currentBird.name;
+        
+        // Генерация вариантов
+        const options = [currentBird];
+        while(options.length < 4 && options.length < birdsData.length) {
+          const randomBird = birdsData[Math.floor(Math.random() * birdsData.length)];
+          if(!options.some(b => b.id === randomBird.id)) {
+            options.push(randomBird);
+          }
+        }
+        
+        elements.optionsContainer.innerHTML = '';
+        options.sort(() => Math.random() - 0.5).forEach(bird => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.textContent = bird.name;
+          btn.addEventListener('click', () => checkAnswer(bird.id === currentBird.id));
+          elements.optionsContainer.appendChild(btn);
+        });
+        
+        elements.nextBtn.disabled = true;
+      }
+      
+      // Проверка ответа
+      function checkAnswer(isCorrect) {
+        if(isCorrect) {
+          state.correctAnswers++;
+          elements.correctCount.textContent = state.correctAnswers;
+        } else {
+          state.incorrectAnswers++;
+          elements.incorrectCount.textContent = state.incorrectAnswers;
+        }
+        
+        elements.nextBtn.disabled = false;
+      }
+      
+      // Таймер
+      function startTimer() {
+        state.timer = setInterval(() => {
+          state.timeLeft--;
+          updateTimer();
+          
+          if(state.timeLeft <= 0) {
+            finishExam();
+          }
+        }, 1000);
+      }
+      
+      function updateTimer() {
+        const minutes = Math.floor(state.timeLeft / 60);
+        const seconds = state.timeLeft % 60;
+        elements.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if(state.timeLeft <= 30) {
+          elements.timer.style.color = '#ef4444';
+        }
+      }
+      
+      // Завершение экзамена
+      function finishExam() {
+        clearInterval(state.timer);
+        elements.testContent.style.display = 'none';
+        elements.examResults.style.display = 'block';
+        elements.finalScore.textContent = `${state.correctAnswers}/${config.totalQuestions}`;
+        
+        if(window.statsTracker) {
+          window.statsTracker.trackExam();
+        }
+      }
+      
+      // Инициализация
+      elements.nextBtn.addEventListener('click', loadQuestion);
+      elements.restartBtn.addEventListener('click', () => window.location.reload());
+      elements.homeBtn.addEventListener('click', () => window.location.href = 'index.html');
+      
+      startTimer();
+      loadQuestion();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Редактор - Ночные хищные птицы</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0.5rem;
+    }
+    
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .editor-grid {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .editor-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .birds-list {
+        height: 200px;
+      }
+    }
+    
+    .birds-list {
+      background: var(--night-card);
+      border-radius: 0.5rem;
+      height: 500px;
+      overflow-y: auto;
+    }
+    
+    .bird-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #2d3748;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .bird-item:hover {
+      background: #1e293b;
+    }
+    
+    .bird-item.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .editor-form {
+      background: var(--night-card);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 0.5rem;
+    }
+    
+    .image-preview {
+      height: 200px;
+      background: #1e293b;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .image-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1>Редактор птиц</h1>
+        <p class="subtitle">Ночные хищные птицы</p>
+      </div>
+    </header>
+
+    <main class="admin-container">
+      <div class="admin-header">
+        <h2>Все птицы</h2>
+        <button id="add-bird-btn" class="primary-btn">+ Добавить птицу</button>
+      </div>
+      
+      <div class="editor-grid">
+        <div class="birds-list" id="birds-list">
+          <!-- Список птиц -->
+        </div>
+        
+        <div class="editor-form" id="editor-form">
+          <div class="empty-state">
+            <h3>Выберите птицу для редактирования</h3>
+            <p>Или создайте новую запись</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <button class="admin-btn" onclick="window.location.href='index.html'">На главную</button>
+    </footer>
+  </div>
+
+  <script src="scripts/birds-data.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const birdsData = [...window.nocturnalBirdsData]; // Копируем массив для редактирования
+      const birdsList = document.getElementById('birds-list');
+      const editorForm = document.getElementById('editor-form');
+      const addBirdBtn = document.getElementById('add-bird-btn');
+      
+      // Сохраняем изменения в localStorage
+      function saveData() {
+        localStorage.setItem('nocturnalBirdsData', JSON.stringify(birdsData));
+        window.nocturnalBirdsData = birdsData;
+      }
+      
+      // Загрузка списка птиц
+      function loadBirdsList() {
+        birdsList.innerHTML = '';
+        birdsData.forEach(bird => {
+          const item = document.createElement('div');
+          item.className = 'bird-item';
+          item.dataset.id = bird.id;
+          item.innerHTML = `
+            <div class="bird-item-name">${bird.name}</div>
+            <div class="bird-item-sci">${bird.scientific}</div>
+          `;
+          item.addEventListener('click', () => loadBirdEditor(bird.id));
+          birdsList.appendChild(item);
+        });
+      }
+      
+      // Загрузка редактора
+      function loadBirdEditor(birdId) {
+        // Снимаем выделение со всех элементов
+        document.querySelectorAll('.bird-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        
+        // Выделяем текущий элемент
+        const listItem = document.querySelector(`.bird-item[data-id="${birdId}"]`);
+        if(listItem) listItem.classList.add('active');
+        
+        const bird = birdsData.find(b => b.id === birdId) || {
+          id: Date.now(),
+          name: '',
+          scientific: '',
+          image: '',
+          description: '',
+          hint: '',
+          size: '',
+          weight: '',
+          rarity: 'common'
+        };
+        
+        editorForm.innerHTML = `
+          <h3>${bird.id && bird.name ? `Редактирование: ${bird.name}` : 'Добавление птицы'}</h3>
+          
+          <div class="form-group">
+            <label>Название птицы</label>
+            <input type="text" id="bird-name" value="${bird.name}" class="form-control" placeholder="Например: Серая неясыть">
+          </div>
+          
+          <div class="form-group">
+            <label>Научное название</label>
+            <input type="text" id="bird-scientific" value="${bird.scientific}" class="form-control" placeholder="Например: Strix aluco">
+          </div>
+          
+          <div class="form-group">
+            <label>Редкость</label>
+            <select id="bird-rarity" class="form-control">
+              <option value="common" ${bird.rarity === 'common' ? 'selected' : ''}>Обычная</option>
+              <option value="rare" ${bird.rarity === 'rare' ? 'selected' : ''}>Редкая</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>Изображение</label>
+            <div class="image-preview">
+              ${bird.image ? `<img src="${bird.image}" alt="Превью">` : 'Изображение не выбрано'}
+            </div>
+            <input type="text" id="bird-image-url" value="${bird.image}" placeholder="URL изображения" class="form-control">
+            <small>Или</small>
+            <input type="file" id="bird-image-upload" class="form-control" accept="image/*">
+          </div>
+          
+          <div class="form-group">
+            <label>Размер</label>
+            <input type="text" id="bird-size" value="${bird.size}" class="form-control" placeholder="Например: 35-40 см">
+          </div>
+          
+          <div class="form-group">
+            <label>Вес</label>
+            <input type="text" id="bird-weight" value="${bird.weight}" class="form-control" placeholder="Например: 400-600 г">
+          </div>
+          
+          <div class="form-group">
+            <label>Описание</label>
+            <textarea id="bird-description" class="form-control" rows="3">${bird.description}</textarea>
+          </div>
+          
+          <div class="form-group">
+            <label>Подсказка</label>
+            <textarea id="bird-hint" class="form-control" rows="2">${bird.hint}</textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button id="save-bird-btn" class="primary-btn">Сохранить</button>
+            ${bird.id && birdsData.some(b => b.id === bird.id) ? 
+              `<button id="delete-bird-btn" class="danger-btn">Удалить</button>` : ''}
+          </div>
+        `;
+        
+        // Обработчики для формы
+        document.getElementById('bird-image-url').addEventListener('input', function() {
+          const preview = document.querySelector('.image-preview');
+          preview.innerHTML = this.value ? `<img src="${this.value}" alt="Превью">` : 'Изображение не выбрано';
+        });
+        
+        document.getElementById('bird-image-upload').addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              document.getElementById('bird-image-url').value = event.target.result;
+              document.querySelector('.image-preview').innerHTML = `<img src="${event.target.result}" alt="Превью">`;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+        
+        document.getElementById('save-bird-btn').addEventListener('click', () => saveBird(bird.id));
+        if(bird.id && birdsData.some(b => b.id === bird.id)) {
+          document.getElementById('delete-bird-btn').addEventListener('click', () => deleteBird(bird.id));
+        }
+      }
+      
+      // Сохранение птицы
+      function saveBird(birdId) {
+        const birdData = {
+          id: birdId || Date.now(),
+          name: document.getElementById('bird-name').value.trim(),
+          scientific: document.getElementById('bird-scientific').value.trim(),
+          image: document.getElementById('bird-image-url').value.trim(),
+          description: document.getElementById('bird-description').value.trim(),
+          hint: document.getElementById('bird-hint').value.trim(),
+          size: document.getElementById('bird-size').value.trim(),
+          weight: document.getElementById('bird-weight').value.trim(),
+          rarity: document.getElementById('bird-rarity').value
+        };
+        
+        if(!birdData.name) {
+          alert('Пожалуйста, укажите название птицы');
+          return;
+        }
+        
+        const existingIndex = birdsData.findIndex(b => b.id === birdId);
+        if(existingIndex >= 0) {
+          birdsData[existingIndex] = birdData;
+        } else {
+          birdsData.push(birdData);
+        }
+        
+        saveData();
+        loadBirdsList();
+        loadBirdEditor(birdData.id);
+        
+        alert('Изменения сохранены');
+      }
+      
+      // Удаление птицы
+      function deleteBird(birdId) {
+        if(confirm('Вы уверены, что хотите удалить эту птицу?')) {
+          const index = birdsData.findIndex(b => b.id === birdId);
+          if(index >= 0) {
+            birdsData.splice(index, 1);
+            saveData();
+            loadBirdsList();
+            editorForm.innerHTML = `
+              <div class="empty-state">
+                <h3>Птица удалена</h3>
+                <p>Выберите другую птицу или создайте новую</p>
+              </div>
+            `;
+          }
+        }
+      }
+      
+      // Инициализация
+      addBirdBtn.addEventListener('click', () => loadBirdEditor(null));
+      loadBirdsList();
+    });
+  </script>
+</body>
+</html>
