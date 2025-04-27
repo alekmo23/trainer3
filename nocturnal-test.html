@@ -9,47 +9,112 @@
     .test-container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 0.5rem;
+      padding: var(--space-md);
     }
     
     .exam-info {
       display: flex;
       justify-content: space-between;
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
       background: var(--night-card);
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
     }
     
     .timer-container {
-      padding: 0.3rem;
-      margin-bottom: 0.5rem;
+      padding: var(--space-sm);
+      margin-bottom: var(--space-md);
       background: var(--primary);
       color: white;
       text-align: center;
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .timer-warning {
+      background: var(--warning);
+    }
+    
+    .timer-danger {
+      background: var(--error);
+      animation: pulse 1s infinite;
     }
     
     .bird-display {
       height: 300px;
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--space-md);
       background: var(--night-card);
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .bird-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
     }
     
     .options-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
     }
     
     .exam-results {
-      padding: 1rem;
+      padding: var(--space-lg);
       background: var(--night-card);
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
       text-align: center;
       display: none;
+      border: 1px solid var(--card-border);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .results-score {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-light);
+      margin: var(--space-md) 0;
+    }
+    
+    .results-message {
+      font-size: 1.2rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .progress-container {
+      height: 8px;
+      background: #1e293b;
+      border-radius: var(--radius-full);
+      margin-bottom: var(--space-md);
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    
+    @media (max-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .bird-display {
+        height: 250px;
+      }
+      
+      .exam-info {
+        flex-direction: column;
+        gap: var(--space-sm);
+      }
     }
   </style>
 </head>
@@ -65,43 +130,46 @@
     <main class="test-container">
       <div class="exam-info">
         <div class="info-item">
-          <div class="info-value" id="question-count">0/10</div>
-          <div class="info-label">Вопросы</div>
+          <div class="stat-value" id="question-count">0/10</div>
+          <div class="stat-label">Вопросы</div>
         </div>
         <div class="info-item">
-          <div class="info-value" id="correct-count">0</div>
-          <div class="info-label">Правильно</div>
+          <div class="stat-value" id="correct-count">0</div>
+          <div class="stat-label">Правильно</div>
         </div>
         <div class="info-item">
-          <div class="info-value" id="incorrect-count">0</div>
-          <div class="info-label">Ошибки</div>
+          <div class="stat-value" id="incorrect-count">0</div>
+          <div class="stat-label">Ошибки</div>
         </div>
       </div>
       
-      <div class="timer-container">
+      <div class="progress-container">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+      </div>
+      
+      <div class="timer-container" id="timer-container">
         Осталось времени: <span id="timer">02:00</span>
       </div>
       
       <div id="test-content">
         <div class="bird-display">
-  <div class="image-ratio-3-2">
-    <img id="bird-image" class="bird-image" src="" alt="Фото птицы">
-  </div>
-</div>
+          <img id="bird-image" class="bird-image" src="" alt="Фото птицы" loading="lazy">
+        </div>
         
         <div class="options-grid" id="options-container">
           <!-- Варианты ответов загружаются через JS -->
         </div>
         
-        <button id="next-btn" class="next-btn" disabled>Следующий вопрос</button>
+        <button id="next-btn" class="next-btn primary-btn" disabled>Следующий вопрос</button>
       </div>
       
       <div id="exam-results" class="exam-results">
         <h2>Экзамен завершен!</h2>
         <div class="results-score" id="final-score">0/10</div>
-        <div class="action-buttons">
-          <button id="restart-btn" class="restart-btn">Начать заново</button>
-          <button id="home-btn" class="home-btn">На главную</button>
+        <div class="results-message" id="results-message"></div>
+        <div class="action-buttons flex gap-sm justify-center">
+          <button id="restart-btn" class="restart-btn primary-btn">Начать заново</button>
+          <button id="home-btn" class="home-btn secondary-btn">На главную</button>
         </div>
       </div>
     </main>
@@ -118,7 +186,9 @@
       const birdsData = window.nocturnalBirdsData;
       const config = {
         totalQuestions: 10,
-        timeLimit: 120
+        timeLimit: 120, // 2 минуты
+        warningThreshold: 30, // 30 секунд
+        dangerThreshold: 10 // 10 секунд
       };
       
       const state = {
@@ -126,7 +196,9 @@
         correctAnswers: 0,
         incorrectAnswers: 0,
         timeLeft: config.timeLimit,
-        timer: null
+        timer: null,
+        selectedBird: null,
+        answered: false
       };
       
       const elements = {
@@ -134,33 +206,59 @@
         correctCount: document.getElementById('correct-count'),
         incorrectCount: document.getElementById('incorrect-count'),
         timer: document.getElementById('timer'),
+        timerContainer: document.getElementById('timer-container'),
         birdImage: document.getElementById('bird-image'),
         optionsContainer: document.getElementById('options-container'),
         nextBtn: document.getElementById('next-btn'),
         testContent: document.getElementById('test-content'),
         examResults: document.getElementById('exam-results'),
         finalScore: document.getElementById('final-score'),
+        resultsMessage: document.getElementById('results-message'),
         restartBtn: document.getElementById('restart-btn'),
-        homeBtn: document.getElementById('home-btn')
+        homeBtn: document.getElementById('home-btn'),
+        progressBar: document.getElementById('progress-bar')
       };
+      
+      // Инициализация экзамена
+      function initExam() {
+        state.currentQuestion = 0;
+        state.correctAnswers = 0;
+        state.incorrectAnswers = 0;
+        state.timeLeft = config.timeLimit;
+        
+        elements.correctCount.textContent = '0';
+        elements.incorrectCount.textContent = '0';
+        elements.testContent.style.display = 'block';
+        elements.examResults.style.display = 'none';
+        
+        clearInterval(state.timer);
+        startTimer();
+        loadQuestion();
+      }
       
       // Загрузка вопроса
       function loadQuestion() {
         state.currentQuestion++;
+        state.answered = false;
         
         if(state.currentQuestion > config.totalQuestions) {
           finishExam();
           return;
         }
         
+        // Обновление прогресс-бара
+        const progress = (state.currentQuestion / config.totalQuestions) * 100;
+        elements.progressBar.style.width = `${progress}%`;
+        
         elements.questionCount.textContent = `${state.currentQuestion}/${config.totalQuestions}`;
         
-        const currentBird = birdsData[Math.floor(Math.random() * birdsData.length)];
-        elements.birdImage.src = currentBird.image;
-        elements.birdImage.alt = currentBird.name;
+        // Выбор случайной птицы
+        state.selectedBird = birdsData[Math.floor(Math.random() * birdsData.length)];
+        elements.birdImage.src = state.selectedBird.image;
+        elements.birdImage.alt = state.selectedBird.name;
         
         // Генерация вариантов
-        const options = [currentBird];
+        const options = [state.selectedBird];
         while(options.length < 4 && options.length < birdsData.length) {
           const randomBird = birdsData[Math.floor(Math.random() * birdsData.length)];
           if(!options.some(b => b.id === randomBird.id)) {
@@ -168,20 +266,37 @@
           }
         }
         
+        // Отображение вариантов
         elements.optionsContainer.innerHTML = '';
         options.sort(() => Math.random() - 0.5).forEach(bird => {
           const btn = document.createElement('button');
-          btn.className = 'option-btn';
+          btn.className = 'option-btn secondary-btn';
           btn.textContent = bird.name;
-          btn.addEventListener('click', () => checkAnswer(bird.id === currentBird.id));
+          btn.addEventListener('click', () => handleAnswer(bird.id === state.selectedBird.id));
           elements.optionsContainer.appendChild(btn);
         });
         
         elements.nextBtn.disabled = true;
       }
       
-      // Проверка ответа
-      function checkAnswer(isCorrect) {
+      // Обработка ответа
+      function handleAnswer(isCorrect) {
+        if(state.answered) return;
+        state.answered = true;
+        
+        const options = Array.from(elements.optionsContainer.children);
+        
+        // Подсветка правильных/неправильных ответов
+        options.forEach(btn => {
+          btn.disabled = true;
+          if(btn.textContent === state.selectedBird.name) {
+            btn.classList.add('correct');
+          } else if(!isCorrect) {
+            btn.classList.add('incorrect');
+          }
+        });
+        
+        // Обновление статистики
         if(isCorrect) {
           state.correctAnswers++;
           elements.correctCount.textContent = state.correctAnswers;
@@ -195,9 +310,10 @@
       
       // Таймер
       function startTimer() {
+        updateTimerDisplay();
         state.timer = setInterval(() => {
           state.timeLeft--;
-          updateTimer();
+          updateTimerDisplay();
           
           if(state.timeLeft <= 0) {
             finishExam();
@@ -205,13 +321,18 @@
         }, 1000);
       }
       
-      function updateTimer() {
+      function updateTimerDisplay() {
         const minutes = Math.floor(state.timeLeft / 60);
         const seconds = state.timeLeft % 60;
         elements.timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         
-        if(state.timeLeft <= 30) {
-          elements.timer.style.color = '#ef4444';
+        // Изменение стиля при приближении к концу времени
+        elements.timerContainer.classList.remove('timer-warning', 'timer-danger');
+        
+        if(state.timeLeft <= config.dangerThreshold) {
+          elements.timerContainer.classList.add('timer-danger');
+        } else if(state.timeLeft <= config.warningThreshold) {
+          elements.timerContainer.classList.add('timer-warning');
         }
       }
       
@@ -220,20 +341,54 @@
         clearInterval(state.timer);
         elements.testContent.style.display = 'none';
         elements.examResults.style.display = 'block';
-        elements.finalScore.textContent = `${state.correctAnswers}/${config.totalQuestions}`;
         
+        const score = state.correctAnswers;
+        const total = config.totalQuestions;
+        const percentage = Math.round((score / total) * 100);
+        
+        elements.finalScore.textContent = `${score}/${total}`;
+        
+        // Генерация сообщения с результатами
+        let message = '';
+        if(percentage >= 90) {
+          message = 'Отличный результат! Вы настоящий эксперт по ночным хищным птицам!';
+        } else if(percentage >= 70) {
+          message = 'Хороший результат! Продолжайте совершенствовать свои знания.';
+        } else if(percentage >= 50) {
+          message = 'Неплохо, но есть куда расти. Попробуйте режим обучения.';
+        } else {
+          message = 'Попробуйте еще раз после изучения материалов в режиме обучения.';
+        }
+        
+        elements.resultsMessage.textContent = message;
+        
+        // Сохранение статистики
         if(window.statsTracker) {
           window.statsTracker.trackExam();
         }
       }
       
-      // Инициализация
+      // Обработчики событий
       elements.nextBtn.addEventListener('click', loadQuestion);
-      elements.restartBtn.addEventListener('click', () => window.location.reload());
+      elements.restartBtn.addEventListener('click', initExam);
       elements.homeBtn.addEventListener('click', () => window.location.href = 'index.html');
       
-      startTimer();
-      loadQuestion();
+      // Lazy loading для изображений
+      const lazyImageObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src || img.src;
+            img.classList.add('loaded');
+            lazyImageObserver.unobserve(img);
+          }
+        });
+      });
+      
+      lazyImageObserver.observe(elements.birdImage);
+      
+      // Запуск экзамена
+      initExam();
     });
   </script>
 </body>
