@@ -17,7 +17,7 @@ window.nocturnalBirdsData = [
     },
     {
         id: 2,
-        name: "Белая сова",
+        name: "Полярная сова",
         scientific: "Nyctea scandiaca",
         family: "Strigidae",
         activity: "nocturnal",
