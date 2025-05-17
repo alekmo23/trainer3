@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Голубеобразные - тренажёр</title>
+    <style>
+        :root {
+            --primary: #6a8fd8;
+            --secondary: #f8f4e6;
+            --accent: #e74c3c;
+            --text: #2c3e50;
+            --light: #ffffff;
+            --dark: #1a2639;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--secondary);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: var(--light);
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+        .subtitle {
+            font-style: italic;
+            opacity: 0.9;
+        }
+        
+        .main-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-btn:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: var(--light);
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+            min-width: 200px;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: var(--text);
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-menu a:hover {
+            background-color: var(--secondary);
+            color: var(--primary);
+        }
+        
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+        
+        .mode-btn {
+            padding: 12px 25px;
+            background-color: var(--light);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .mode-btn.active, .mode-btn:hover {
+            background-color: var(--primary);
+            color: var(--light);
+        }
+        
+        .content-area {
+            background-color: var(--light);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            min-height: 400px;
+            position: relative;
+        }
+        
+        .bird-card {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .bird-card.active {
+            display: block;
+        }
+        
+        .bird-image {
+            max-width: 100%;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .bird-name {
+            color: var(--primary);
+            font-size: 1.8em;
+            margin: 10px 0;
+        }
+        
+        .bird-scientific {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        
+        .bird-description {
+            text-align: left;
+            margin-bottom: 25px;
+        }
+        
+        .quiz-question {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .quiz-option {
+            padding: 15px;
+            background-color: var(--secondary);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background-color: var(--primary);
+            color: var(--light);
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            background-color: var(--primary);
+            color: var(--light);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background-color: #5a7bc7;
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 20px;
+            min-height: 24px;
+        }
+        
+        .correct {
+            color: #27ae60;
+        }
+        
+        .incorrect {
+            color: var(--accent);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #dfe6e9;
+            border-radius: 10px;
+            margin: 20px 0;
+            height: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        /* Стили для страницы с описанием отряда */
+        .order-info {
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .order-info.active {
+            display: block;
+        }
+        
+        .order-info h2 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        
+        .order-info h3 {
+            color: var(--dark);
+            margin-top: 20px;
+        }
+        
+        .order-info img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .order-info ul {
+            padding-left: 20px;
+        }
+        
+        .order-info li {
+            margin-bottom: 8px;
+        }
+        
+        .order-info table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .order-info th, .order-info td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .order-info th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .order-info tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: var(--dark);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .main-menu {
+                position: static;
+                margin-top: 15px;
+            }
+            
+            .dropdown-menu {
+                left: 0;
+                right: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Голубеобразные</h1>
+            <p class="subtitle">Интерактивный тренажёр для изучения птиц</p>
+            
+            <div class="main-menu">
+                <button class="menu-btn">Меню ▼</button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#" class="menu-item" data-page="study">Режим изучения</a>
+                    <a href="#" class="menu-item" data-page="quiz">Режим тестирования</a>
+                    <a href="#" class="menu-item" data-page="order-info">Об отряде Голубеобразные</a>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Режим изучения -->
+        <div id="study-section">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="study">Режим изучения</button>
+                <button class="mode-btn" data-mode="quiz">Режим тестирования</button>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress"></div>
+            </div>
+            
+            <div class="content-area">
+                <div class="bird-card active" id="study-mode">
+                    <img src="imagescolumba/columba-livia.jpg" alt="Сизый голубь" class="bird-image" id="bird-img">
+                    <h2 class="bird-name" id="bird-name">Сизый голубь</h2>
+                    <p class="bird-scientific" id="bird-scientific">Columba livia</p>
+                    <div class="bird-description" id="bird-description">
+                        <p>Сизый голубь — широко распространённая птица семейства голубиных. Длина тела 29-36 см, размах крыльев 50-67 см. Оперение сизое, с двумя тёмными полосами на крыле и белой поясницей.</p>
+                        <p>Изначально обитал в скалистых местностях, но прекрасно адаптировался к жизни в городах. Питается семенами, зёрнами, иногда плодами и насекомыми.</p>
+                    </div>
+                    <div class="navigation">
+                        <button class="nav-btn" id="prev-btn">Назад</button>
+                        <button class="nav-btn" id="next-btn">Вперёд</button>
+                    </div>
+                </div>
+                
+                <!-- Режим тестирования -->
+                <div class="bird-card" id="quiz-mode">
+                    <div class="quiz-question" id="quiz-question">Какая птица изображена на фото?</div>
+                    <img src="imagescolumba/columba-livia.jpg" alt="Птица" class="bird-image" id="quiz-img">
+                    <div class="quiz-options" id="quiz-options">
+                        <!-- Варианты ответов будут добавлены через JavaScript -->
+                    </div>
+                    <div class="result" id="quiz-result"></div>
+                    <div class="navigation">
+                        <button class="nav-btn" id="check-btn">Проверить</button>
+                        <button class="nav-btn" id="next-quiz-btn" disabled>Следующий вопрос</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <span id="bird-counter">1 из 8</span>
+                <span id="quiz-stats">Правильно: 0 | Неправильно: 0</span>
+            </div>
+        </div>
+        
+        <!-- Страница с информацией об отряде -->
+        <div class="order-info" id="order-info">
+            <a href="#" class="back-btn" id="back-btn">← Назад к тренажёру</a>
+            
+            <h2>Отряд Голубеобразные (Columbiformes)</h2>
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Streptopelia_turtur_-_European_Turtle_Dove.jpg/800px-Streptopelia_turtur_-_European_Turtle_Dove.jpg" alt="Представитель голубеобразных">
+            
+            <p>Голубеобразные — отряд птиц, включающий около 350 видов, распространённых по всему миру, за исключением Антарктиды и некоторых удалённых островов. Наиболее известные представители — голуби и горлицы.</p>
+            
+            <h3>Систематика</h3>
+            <p>Отряд включает следующие семейства:</p>
+            <ul>
+                <li><strong>Голубиные (Columbidae)</strong> — единственное современное семейство в отряде</li>
+                <li><strong>Дронтовые (Raphidae)</strong> — вымершее семейство, включавшее додо и родригесского дронта</li>
+            </ul>
+            
+            <h3>Морфологические особенности</h3>
+            <p>Характерные черты голубеобразных:</p>
+            <ul>
+                <li>Коренастое телосложение с небольшой головой</li>
+                <li>Короткая шея и ноги</li>
+                <li>Крепкий клюв с восковицей у основания</li>
+                <li>Мягкое и плотное оперение</li>
+                <li>Хорошо развитые крылья, обеспечивающие быстрый полёт</li>
+                <li>Способность пить воду, втягивая её без необходимости запрокидывать голову</li>
+            </ul>
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Columba_palumbus_-_Wood_Pigeon.jpg/800px-Columba_palumbus_-_Wood_Pigeon.jpg" alt="Вяхирь - представитель голубеобразных">
+            
+            <h3>Распространение и среда обитания</h3>
+            <p>Голубеобразные населяют самые разнообразные биотопы:</p>
+            <table>
+                <tr>
+                    <th>Среда обитания</th>
+                    <th>Примеры видов</th>
+                </tr>
+                <tr>
+                    <td>Леса</td>
+                    <td>Вяхирь, клинтух, изумрудный голубь</td>
+                </tr>
+                <tr>
+                    <td>Саванны и степи</td>
+                    <td>Смеющаяся горлица, капский голубь</td>
+                </tr>
+                <tr>
+                    <td>Горные районы</td>
+                    <td>Скалистый голубь, снеговая горлица</td>
+                </tr>
+                <tr>
+                    <td>Городские ландшафты</td>
+                    <td>Сизый голубь, кольчатая горлица</td>
+                </tr>
+                <tr>
+                    <td>Острова</td>
+                    <td>Венценосные голуби, зубчатоклювый голубь</td>
+                </tr>
+            </table>
+            
+            <h3>Питание</h3>
+            <p>Большинство голубеобразных — растительноядные птицы, питающиеся преимущественно семенами, плодами и листьями. Некоторые особенности питания:</p>
+            <ul>
+                <li>Основу рациона составляют семена культурных и дикорастущих растений</li>
+                <li>Многие виды поедают плоды и ягоды</li>
+                <li>Некоторые тропические виды питаются почти исключительно фруктами</li>
+                <li>Изредка в пищу идут мелкие беспозвоночные</li>
+                <li>Птенцов выкармливают "зобным молочком" — питательной массой, вырабатываемой в зобе</li>
+            </ul>
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/African_Green_Pigeon_%28Treron_calvus%29.jpg/800px-African_Green_Pigeon_%28Treron_calvus%29.jpg" alt="Африканский зелёный голубь">
+            
+            <h3>Размножение</h3>
+            <p>Особенности размножения голубеобразных:</p>
+            <ul>
+                <li>Моногамны, многие виды образуют постоянные пары</li>
+                <li>Строят простые гнёзда на деревьях, скалах или зданиях</li>
+                <li>Откладывают 1-2 (редко 3) яйца</li>
+                <li>Инкубационный период — 14-30 дней в зависимости от вида</li>
+                <li>Птенцы вылупляются слепыми и беспомощными</li>
+                <li>Оба родителя участвуют в выкармливании птенцов</li>
+                <li>У многих видов несколько кладок за сезон</li>
+            </ul>
+            
+            <h3>Значение для человека</h3>
+            <p>Голубеобразные имеют большое значение для человека:</p>
+            <ul>
+                <li>Сизый голубь одомашнен и используется как почтовый, декоративный и мясной</li>
+                <li>Многие виды — популярные объекты охоты</li>
+                <li>Некоторые виды стали синантропными (живут рядом с человеком)</li>
+                <li>Отдельные виды наносят ущерб сельскому хозяйству</li>
+                <li>Дронты стали символом вымирания по вине человека</li>
+                <li>Многие виды имеют культурное и религиозное значение</li>
+            </ul>
+            
+            <h3>Охранный статус</h3>
+            <p>Около 60 видов голубеобразных находятся под угрозой исчезновения. Основные угрозы:</p>
+            <ul>
+                <li>Уничтожение мест обитания</li>
+                <li>Охота и браконьерство</li>
+                <li>Интродукция хищников на острова</li>
+                <li>Конкуренция с инвазивными видами</li>
+            </ul>
+            
+            <p>Самые известные вымершие виды — додо (Mauritius) и родригесский дронт, исчезнувшие в XVII-XVIII веках.</p>
+            
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Goura_scheepmakeri_-San_Diego_Zoo-8a.jpg/800px-Goura_scheepmakeri_-San_Diego_Zoo-8a.jpg" alt="Венценосный голубь">
+            
+            <a href="#" class="back-btn" id="back-btn-bottom">← Назад к тренажёру</a>
+        </div>
+    </div>
+    
+    <script>
+        // База данных птиц
+        const birds = [
+            {
+                name: "Сизый голубь",
+                scientific: "Columba livia",
+                image: "imagescolumba/columba-livia.jpg",
+                description: "Сизый голубь — широко распространённая птица семейства голубиных. Длина тела 29-36 см, размах крыльев 50-67 см. Оперение сизое, с двумя тёмными полосами на крыле и белой поясницей. Изначально обитал в скалистых местностях, но прекрасно адаптировался к жизни в городах. Питается семенами, зёрнами, иногда плодами и насекомыми."
+            },
+            {
+                name: "Вяхирь",
+                scientific: "Columba palumbus",
+                image: "imagescolumba/Columba-palumbus.jpg",
+                description: "Вяхирь — самый крупный из голубей, обитающих в Европе. Длина тела 40-45 см, размах крыльев 75-80 см. Оперение серо-голубое, с белыми пятнами на шее и белыми полосами на крыльях. Обитает в лесах, парках и садах. Питается семенами, зёрнами, ягодами и молодыми побегами растений."
+            },
+            {
+                name: "Клинтух",
+                scientific: "Columba oenas",
+                image: "imagescolumba/columba-oenas.jpg",
+                description: "Клинтух — голубь средних размеров, длиной 32-34 см. Оперение серо-голубое, без белых пятен. Отличается от сизого голубя более тёмным оперением и отсутствием белой поясницы. Обитает в лиственных и смешанных лесах, гнездится в дуплах деревьев. Питается семенами и зёрнами."
+            },
+            {
+                name: "Обыкновенная горлица",
+                scientific: "Streptopelia turtur",
+                image: "imagescolumba/Streptopelia-turtur.jpg",
+                description: "Обыкновенная горлица — небольшой изящный голубь длиной 26-28 см. Оперение охристо-коричневое с чёрно-белым рисунком на шее. Хвост с белой каймой. Обитает в светлых лесах, парках и садах. Питается семенами растений, которые собирает на земле."
+            },
+            {
+                name: "Кольчатая горлица",
+                scientific: "Streptopelia decaocto",
+                image: "imagescolumba/Streptopelia-decaocto.jpg",
+                description: "Кольчатая горлица — голубь средних размеров, длиной 31-33 см. Оперение бежево-серое с чёрным полукольцом на шее. Хвост длинный с белыми перьями по краям. Обитает в городах, парках и садах. Питается семенами и зёрнами."
+            },
+            {
+                name: "Большая горлица",
+                scientific: "Streptopelia orientalis",
+                image: "imagescolumba/Streptopelia-orientalis.jpg",
+                description: "Большая горлица — крупный представитель горлиц, длиной 33-35 см. Оперение коричневато-серое с чешуйчатым рисунком на крыльях и чёрно-белым полосатым рисунком на шее. Обитает в лесах и парках. Питается семенами и ягодами."
+            },
+            {
+                name: "Африканский зелёный голубь",
+                scientific: "Treron calvus",
+                image: "imagescolumba/Treron-calvus.jpg",
+                description: "Африканский зелёный голубь — ярко окрашенная птица с преимущественно зелёным оперением. Длина тела 25-28 см. Обитает в лесах и саваннах Африки. Питается преимущественно фруктами и ягодами. В отличие от большинства голубей, часто кормится, вися вниз головой на ветвях."
+            },
+            {
+                name: "Венценосный голубь",
+                scientific: "Goura spp.",
+                image: "imagescolumba/goura-scheepmakeri.jpg",
+                description: "Венценосные голуби — крупные птицы длиной до 75 см с эффектным ажурным хохолком на голове. Обитают в Новой Гвинее и на близлежащих островах. Держатся в лесах, питаются упавшими плодами, семенами и мелкими беспозвоночными. Из-за красивого оперения подвергаются интенсивному преследованию."
+            }
+        ];
+        
+        // Элементы интерфейса
+        const studySection = document.getElementById('study-section');
+        const orderInfo = document.getElementById('order-info');
+        const studyMode = document.getElementById('study-mode');
+        const quizMode = document.getElementById('quiz-mode');
+        const modeBtns = document.querySelectorAll('.mode-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const nextQuizBtn = document.getElementById('next-quiz-btn');
+        const birdCounter = document.getElementById('bird-counter');
+        const quizStats = document.getElementById('quiz-stats');
+        const progressBar = document.getElementById('progress');
+        const menuBtn = document.querySelector('.menu-btn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const menuItems = document.querySelectorAll('.menu-item');
+        const backBtns = document.querySelectorAll('#back-btn, #back-btn-bottom');
+        
+        // Переменные состояния
+        let currentMode = 'study';
+        let currentBirdIndex = 0;
+        let quizAnswers = [];
+        let currentQuizIndex = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let quizCompleted = false;
+        
+        // Инициализация приложения
+        function init() {
+            updateStudyCard();
+            setupEventListeners();
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Переключение режимов
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentMode = btn.dataset.mode;
+                    
+                    if (currentMode === 'study') {
+                        studyMode.classList.add('active');
+                        quizMode.classList.remove('active');
+                    } else {
+                        studyMode.classList.remove('active');
+                        quizMode.classList.add('active');
+                        if (quizAnswers.length === 0) {
+                            generateQuiz();
+                        } else if (quizCompleted) {
+                            resetQuiz();
+                            generateQuiz();
+                        }
+                        showNextQuizQuestion();
+                    }
+                });
+            });
+            
+            // Навигация в режиме изучения
+            prevBtn.addEventListener('click', () => {
+                if (currentBirdIndex > 0) {
+                    currentBirdIndex--;
+                    updateStudyCard();
+                }
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                if (currentBirdIndex < birds.length - 1) {
+                    currentBirdIndex++;
+                    updateStudyCard();
+                }
+            });
+            
+            // Проверка ответа в режиме тестирования
+            checkBtn.addEventListener('click', checkAnswer);
+            
+            // Следующий вопрос в режиме тестирования
+            nextQuizBtn.addEventListener('click', showNextQuizQuestion);
+            
+            // Меню
+            menuBtn.addEventListener('click', () => {
+                dropdownMenu.classList.toggle('show');
+            });
+            
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.main-menu')) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+            
+            // Переход по пунктам меню
+            menuItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = item.dataset.page;
+                    
+                    if (page === 'study' || page === 'quiz') {
+                        studySection.style.display = 'block';
+                        orderInfo.style.display = 'none';
+                        
+                        if (page === 'study') {
+                            modeBtns[0].click();
+                        } else {
+                            modeBtns[1].click();
+                        }
+                    } else if (page === 'order-info') {
+                        studySection.style.display = 'none';
+                        orderInfo.style.display = 'block';
+                    }
+                    
+                    dropdownMenu.classList.remove('show');
+                });
+            });
+            
+            // Кнопки "Назад" на странице информации
+            backBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    studySection.style.display = 'block';
+                    orderInfo.style.display = 'none';
+                });
+            });
+        }
+        
+        // Обновление карточки в режиме изучения
+        function updateStudyCard() {
+            const bird = birds[currentBirdIndex];
+            document.getElementById('bird-img').src = bird.image;
+            document.getElementById('bird-img').alt = bird.name;
+            document.getElementById('bird-name').textContent = bird.name;
+            document.getElementById('bird-scientific').textContent = bird.scientific;
+            document.getElementById('bird-description').innerHTML = `<p>${bird.description}</p>`;
+            
+            birdCounter.textContent = `${currentBirdIndex + 1} из ${birds.length}`;
+            progressBar.style.width = `${((currentBirdIndex + 1) / birds.length) * 100}%`;
+            
+            prevBtn.disabled = currentBirdIndex === 0;
+            nextBtn.disabled = currentBirdIndex === birds.length - 1;
+        }
+        
+        // Генерация вопросов для теста
+        function generateQuiz() {
+            quizAnswers = [];
+            const shuffledBirds = [...birds].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < Math.min(8, birds.length); i++) {
+                const correctBird = shuffledBirds[i];
+                const options = [correctBird.name];
+                
+                // Добавляем 3 неправильных варианта
+                while (options.length < 4) {
+                    const randomBird = birds[Math.floor(Math.random() * birds.length)].name;
+                    if (!options.includes(randomBird)) {
+                        options.push(randomBird);
+                    }
+                }
+                
+                // Перемешиваем варианты
+                options.sort(() => Math.random() - 0.5);
+                
+                quizAnswers.push({
+                    image: correctBird.image,
+                    correctAnswer: correctBird.name,
+                    options: options
+                });
+            }
+            
+            currentQuizIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            quizCompleted = false;
+            updateQuizStats();
+        }
+        
+        // Показать следующий вопрос теста
+        function showNextQuizQuestion() {
+            if (currentQuizIndex >= quizAnswers.length) {
+                // Тест завершен
+                document.getElementById('quiz-question').textContent = 'Тест завершён!';
+                document.getElementById('quiz-img').style.display = 'none';
+                document.getElementById('quiz-options').innerHTML = '';
+                document.getElementById('quiz-result').innerHTML = `
+                    <p>Вы ответили правильно на ${correctAnswers} из ${quizAnswers.length} вопросов.</p>
+                    <p>Это ${Math.round((correctAnswers / quizAnswers.length) * 100)}% правильных ответов.</p>
+                `;
+                checkBtn.style.display = 'none';
+                nextQuizBtn.style.display = 'none';
+                quizCompleted = true;
+                return;
+            }
+            
+            const question = quizAnswers[currentQuizIndex];
+            document.getElementById('quiz-question').textContent = 'Какая птица изображена на фото?';
+            document.getElementById('quiz-img').src = question.image;
+            document.getElementById('quiz-img').style.display = 'block';
+            document.getElementById('quiz-img').alt = 'Птица для определения';
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option';
+                optionElement.textContent = option;
+                optionElement.dataset.answer = option;
+                optionElement.addEventListener('click', function() {
+                    // Удаляем выделение у всех вариантов
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.style.backgroundColor = '';
+                        opt.style.color = '';
+                    });
+                    
+                    // Выделяем выбранный вариант
+                    this.style.backgroundColor = '#6a8fd8';
+                    this.style.color = 'white';
+                    
+                    // Разрешаем проверку ответа
+                    checkBtn.disabled = false;
+                });
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            document.getElementById('quiz-result').textContent = '';
+            checkBtn.disabled = true;
+            nextQuizBtn.disabled = true;
+            checkBtn.style.display = 'inline-block';
+            nextQuizBtn.style.display = 'inline-block';
+            
+            progressBar.style.width = `${((currentQuizIndex + 1) / quizAnswers.length) * 100}%`;
+            currentQuizIndex++;
+        }
+        
+        // Проверить ответ в тесте
+        function checkAnswer() {
+            const selectedOption = document.querySelector('.quiz-option[style*="background-color: rgb(106, 143, 216)"]');
+            if (!selectedOption) return;
+            
+            const correctAnswer = quizAnswers[currentQuizIndex - 1].correctAnswer;
+            const userAnswer = selectedOption.dataset.answer;
+            
+            if (userAnswer === correctAnswer) {
+                document.getElementById('quiz-result').textContent = 'Правильно!';
+                document.getElementById('quiz-result').className = 'result correct';
+                correctAnswers++;
+            } else {
+                document.getElementById('quiz-result').textContent = `Неправильно! Правильный ответ: ${correctAnswer}`;
+                document.getElementById('quiz-result').className = 'result incorrect';
+                incorrectAnswers++;
+            }
+            
+            updateQuizStats();
+            checkBtn.disabled = true;
+            nextQuizBtn.disabled = false;
+        }
+        
+        // Обновить статистику теста
+        function updateQuizStats() {
+            quizStats.textContent = `Правильно: ${correctAnswers} | Неправильно: ${incorrectAnswers}`;
+        }
+        
+        // Сбросить тест
+        function resetQuiz() {
+            quizAnswers = [];
+            currentQuizIndex = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            quizCompleted = false;
+            updateQuizStats();
+        }
+        
+        // Запуск приложения
+        init();
+    </script>
+</body>
+</html>
