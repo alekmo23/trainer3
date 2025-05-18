@@ -694,6 +694,12 @@
             
             // Переход по пунктам меню
             menuItems.forEach(item => {
+                if (item.hasAttribute('data-external')) {
+            // Для внешних ссылок ничего не делаем - они откроются в новой вкладке
+            dropdownMenu.classList.remove('show');
+            return;
+                }
+
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = item.dataset.page;
